@@ -6,20 +6,36 @@
     $passwd = $_POST['passwd'];
     $enc_pass = md5($passwd);
 
-    $sql = "
-        INSERT INTO users2 (fullname, email, password) 
-            VALUES ('$fullname', '$email','$enc_pass')
-    ";
+    $sql_validate_email = " SELECT * FROM users2 WHERE email= '$email'";
+    $result = pg_query($conn, $sql_validate_email);
+    $total = pg_num_rows($result);
 
-    $ans = pg_query($conn,$sql);
-    if ($ans){
-        echo "User has been created successfully";
+    if($total >0){
+        echo "<script>alert('Email already exists')</script>" ;
+        header("refresh:0;url=../singup.html");
+
     }else{
-        echo "Error: " . pg_last_error();
+
+        $sql = "
+        INSERT INTO users (fullname, email, password) 
+            VALUES ('$fullname', '$email','$enc_pass')
+        ";
+
+        $ans = pg_query($conn , $sql);
+        if ($ans){
+            echo "<script>alert('User has been registered')</script>";
+            header("refresh:0;url=../signin.php");
+        }else{
+            
+            echo "Error: " . pg_last_error();
+        }
     }
 
+   
+
     //Close connection
-    pg_close($conn);
+    pg_close($conn)
 
     
+
 ?>
